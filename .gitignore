@@ -1,0 +1,4 @@
+closure-library/*
+WEB-INF/*
+js/out/app.min.js
+js/out/deps.js

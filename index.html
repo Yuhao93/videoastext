@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+  </head>
+  <body>
+    <div class="banner">
+      <h1 style="display:inline-block">Video as text</h1>
+      <h3>your videos, super low definition.</h3>
+    </div>
+    <div class="main-content">
+      <div class="col-md-2 visible-lg visible-md" id="side-bar">
+        <ul>
+          <li class="selected">Home</li>
+          <li>How it works</li>
+          <li>The source</li>
+        </ul>
+      </div>
+      <div class="col-md-10">
+        <div class="col-md-8" style="margin-right:auto;margin-left:auto;float:none;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body">
+                <div class="jumbotron">
+                  <h2 style="margin-bottom:20px;">Play a sample text video</h2>
+                  <div class="btn-group">
+                    <div class="btn btn-success btn-lg btn-video" id="sample-hummingbird">Hummingbird</div>
+                    <div class="btn btn-success btn-lg btn-video" id="sample-superman">Man of Steel</div>
+                  </div>
+                </div>
+                <div class="jumbotron" id="control-container">
+                  <h2 style="margin-bottom:20px;">Or play your own video</h2>
+                  <a href="#" id="video" class="btn btn-default btn-lg btn-control">Load Video</a>
+                  <a href="#" id="play" class="btn btn-success  btn-lg btn-control disabled">Play</a>
+                </div>
+              </div>
+            </div>
+          </div>
+  	    </div>
+  	  </div>
+  	</div>
+  	<div id="video-container">
+  	  <div id="screen" class="monospace-canvas">
+  	  </div>
+  	  <div id="control">
+  	    <div class="btn btn-default pause" id="play-pause">
+  	      <span class="glyphicon glyphicon-pause"></span>
+  	    </div>
+        <div class="progress" id="video-progress">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="btn btn-default pull-right fullscreen" id="fullscreen" style="right:0px;">
+          <span class="glyphicon glyphicon-fullscreen"></span>
+        </div>
+      </div>
+  	</div>
+  	<div id="measure" class="monospace-canvas">.</div>
+    <script type="text/javascript" src="js/out/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/out/app.min.js"></script>
+    <script type="text/javascript">
+    var app = new asv.App();
+    </script>
+  </body>
+</html>
