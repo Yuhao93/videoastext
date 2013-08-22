@@ -45,7 +45,7 @@ asv.Screen = function(onHide, onPlayPause, onProgressUpdate, onFullscreen) {
    * @private
    */
   this.control_ = new asv.Control(onPlayPause,
-      goog.bind(this.toggleFullscreen_, this),
+      goog.bind(this.fullscreen, this),
       onProgressUpdate);
 
   /**
@@ -157,6 +157,8 @@ asv.Screen.prototype.fullscreen = function(fullscreen) {
     if (this.screenContainer_) {
       goog.dom.fullscreen.requestFullScreen(this.screenContainer_);
     }
+  } else {
+    goog.dom.fullscreen.exitFullScreen();
   }
 };
 
@@ -226,15 +228,6 @@ asv.Screen.prototype.hideControls_ = function() {
 
 
 /**
- * @param {boolean} fullscreen Whether the app is in full screen mode.
- * @private
- */
-asv.Screen.prototype.toggleFullscreen_ = function(fullscreen) {
-  this.fullscreen(fullscreen);
-};
-
-
-/**
  * @param {goog.events.KeyEvent} e The event.
  * @private
  */
@@ -249,6 +242,9 @@ asv.Screen.prototype.keyHandler_ = function(e) {
 };
 
 
+/**
+ * @private
+ */
 asv.Screen.prototype.onFullScreenChange_ = function() {
   if (goog.dom.fullscreen.isFullScreen()) {
     var windowSize = this.viewportSizeMonitor_.getSize();
