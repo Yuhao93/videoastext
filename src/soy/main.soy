@@ -1,0 +1,76 @@
+{namespace org.haodev.asv.main}
+
+
+/**
+ * The main page
+ */
+{template .page}
+  {call org.haodev.asv.page.doc}
+    {param title: 'Video as text'/}
+    {param desc: 'Enjoy videos at super-low resolution.'/}
+    {param page: 'main'/}
+    {param content}{call .content/}{/param}
+    {param playsVideo: true/}
+    {param jsSrc}{call .jsSrc/}{/param}
+    {param exec}{call .exec/}{/param}
+  {/call}
+{/template}
+
+
+/**
+ * Loads the app js
+ */
+{template .jsSrc}
+  <script type="text/javascript" src="bin/js/app.min.js"></script>
+{/template}
+
+
+/**
+ * Starts the app js
+ */
+{template .exec}
+  <script type="text/javascript">
+    var app = new asv.App();
+  </script>
+{/template}
+ 
+
+/**
+ * Displays the video content
+ */
+{template .content}
+  <div class="jumbotron">
+    <h2 style="margin-bottom:20px;">Play a sample text video</h2>
+    <div class="btn-group">
+      <div class="btn btn-success btn-lg btn-video" id="sample-hummingbird">Hummingbird</div>
+      <div class="btn btn-success btn-lg btn-video" id="sample-superman">Man of Steel</div>
+    </div>
+  </div>
+  <div class="jumbotron" id="control-container">
+    <h2 style="margin-bottom:20px;">Or play your own video</h2>
+    <a href="#" id="video" class="btn btn-default btn-lg btn-control">Load Video</a>{sp}
+    <a href="#" id="play" class="btn btn-success  btn-lg btn-control disabled">Play</a>
+  </div>
+{/template}
+
+
+/**
+ * Renders the video playing elements
+ */
+{template .video}
+<div id="video-container">
+  <div id="screen" class="monospace-canvas"></div>
+  <div id="control">
+    <div class="btn btn-default pause" id="play-pause">
+      <span class="glyphicon glyphicon-pause"></span>
+    </div>
+    <div class="progress" id="video-progress">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="btn btn-default pull-right fullscreen" id="fullscreen" style="right:0px;">
+      <span class="glyphicon glyphicon-fullscreen"></span>
+    </div>
+  </div>
+</div>
+ <div id="measure" class="monospace-canvas">.</div>
+{/template}

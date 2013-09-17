@@ -1,0 +1,20 @@
+/**
+ * Builds soy templates
+ */
+
+Group srcs = Group("*.soy");
+
+Package java = Package(
+    mapo.compileJar()
+        .from(srcs)
+        .into(bin("WEB-INF/lib/mapo_compiled.jar"))
+);
+
+Package js = Package(
+    mapo.compileJs()
+        .from(srcs)
+        .into(bin("src/js/compiled/{INPUT_FILE_NAME_NO_EXT}_gen.js"))
+        .forClosure()
+);
+
+defaultTo(java);

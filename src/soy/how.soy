@@ -1,0 +1,244 @@
+{namespace org.haodev.asv.how}
+
+
+
+/**
+ * The How page
+ */
+{template .page}
+  {call org.haodev.asv.page.doc}
+    {param title: 'How'/}
+    {param desc: ''/}
+    {param page: 'how'/}
+    {param content}{call .content/}{/param}
+    {param playsVideo: false/}
+    {param jsSrc: null/}
+    {param exec: null/}
+  {/call}
+{/template}
+
+
+/**
+ * The content for the how page.
+ */
+{template .content}
+  <h2>Behind the scenes</h2>
+  <p>
+    This page walks you through the key points of how it was done.{sp}
+    There will be a few code snippets, but if you want the entire source, the code is{sp}
+    <a href="https://github.com/Yuhao93/videoastext" target="_blank">here</a>.<br>{sp}
+  </p>
+  <p>
+    In this experiment, I used several Html5 specific goodies, including the Canvas,{sp}
+    the Video functionality, and the FileReader api. This method works when playing videos
+    that are small enough to fit comfortably inside your RAM, so unless you plan on playing
+    a full-blown movie (really?) you should be okay.<br><br>
+  </p>
+  <h3 class="section">Playing videos (local ones) with Html5</h3>
+  
+  <h4 class="section">Reading local files</h4><br>
+  <p>
+    Before Html5, in order to parse a file on the user's local file system,{sp}
+    you'd need to upload it to the server as part of a form submission.{sp}
+    Thankfully, Html5 gives us easier ways of parsing user uploaded files,{sp}
+    ones that don't even need to involve any kind of server request. The FileReader{sp}
+    api allows us to parse a user uploaded file on the client side into any number of{sp}
+    useful formats.
+  </p>
+  <p>
+    If only we could convert a user uploaded file into a data url, then we{sp}
+    could totally play a local video using the &lt;video&gt; tag...oh that's, right, we can!
+  </p>
+  <pre class="prettyprint">{call .filereaderCode/}</pre>
+  
+  <h4 class="section">Grabbing video frames with Canvas</h4><br>
+  <p>
+    Ok, now that we have a video that's playing our uploaded file, what's next?{sp}
+    We have a video but it's boring and <i>"high definition"</i>.{sp}
+    We need to kick it down a few notches.{sp}
+    What better way to do that then turn it into ascii art?{sp}
+    The first step to doing this is grabing the image frames in a way where we can process them.
+  </p>
+  <pre class="prettyprint">{call .canvasCode1/}</pre>
+  <p>
+    Uh oh, what did I say in the previous code snippet? That it might not work?{sp}
+    This is because you generally can't grab data from resources from other domains,{sp}
+    so we're more or less stuck with data urls.
+  </p>
+  <p>
+    Now that we've grabbed an image, we can easily wrap this into a timeout so we can{sp}
+    grab the current frame every so often.
+  </p>
+  <pre class="prettyprint">{call .canvasCode2/}</pre>
+  <h3 class="section">Converting an image into text</h3>
+  <h4 class="section">Pixels as characters</h4><br>
+  <p>
+    Now that we are grabbing the current video frame every so often,{sp}
+    it's time to turn each of those frames into text.{sp}
+    We can achieve this by following a simple algorithm:
+    <ul>
+      <li>Create a text buffer of some kind, with length w * h </li>
+      <li>Shrink the image down to a w * h image</li>
+      <li>For each pixel in the image:</li>
+      <ul>
+        <li>
+          Compute the luminance (basially the brightness) of the pixel, I used the formula:{sp}
+          <pre class="prettyprint">var lum = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);</pre>{sp}
+          where r, g, and b are the red, green, and blue components of the pixel, respectively.{sp}
+          This formula is based on the idea that red, green, and blue components are generally{sp}
+          percieved with different levels of brightness. Green components are brighter than{sp}
+          their red and blue counterparts, so they are given a much high constant.{sp}<br><br>
+          <b>Note: </b>If you really want to be accurate, you can't just use the rgb components{sp}
+          from the [0-255] range, you need to transform them into a linear space by applying an{sp}
+          inverse gamma function to each component, see{sp}
+          <a href="http://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color#answer-13558570"
+              target="_blank">
+          here</a> for a better explanation.{sp}
+          The result of not applying this transformation means we will lose some accuracy in our{sp}
+          luminance calculation.
+        </li><br>
+        <li>
+          Determine the corresponding character for the luminance, for example, a low luminance{sp}
+          might map to the blank character while a high luminance might map to the capital M.
+        </li><br>
+        <li>
+          Add this character to the text buffer. Also add a line break at the end of every line.
+        </li>
+      </ul>
+    </ul>
+  </p>
+  <pre class="prettyprint">{call .pixelCode/}</pre>
+  <p>
+    <b>
+      And that's pretty much how it all works. Everything else is just putting it all together{sp}
+      and creating a nice ui around it.
+    </b>
+  </p>
+{/template}
+
+
+/**
+ * Code for demonstrating the FileReader api.
+ */
+{template .filereaderCode}
+{literal}
+// Lets say that the user has uploaded a file into a file input with the id
+// 'file-upload'
+var fileUploadElement = document.getElementById('file-upload');
+// We are able to grab the file out of the input
+var file = fileUploadElement.files[0];
+
+// Create a file reader to read the contents of the file
+var fileReader = new FileReader();
+fileReader.onload = function(e) {
+  // When onload is called, target.result will contain the data url we need.
+  // A data url is convenient for our needs, because we can plug it directly
+  // into a video tag's source.
+  setVideoSource(e.target.result);
+};
+
+// Read the selected user file into a data url in a format like:
+// data:video/mp4;base64,lotsofcharacters
+fileReader.readAsDataURL(file);
+{/literal}
+{/template}
+
+
+/**
+ * Code for demonstrating grabbing video frames via the Canvas part 1.
+ */
+{template .canvasCode1}
+{literal}
+// Suppose that our video that is playing is in a &lt;video&gt; tag with id
+// 'video-src'
+var video = document.getElementById('video-src');
+
+// Now lets create a canvas element.
+var canvas = document.createElement('canvas');
+canvas.width = 640;
+canvas.height = 480;
+var canvasContext = canvas.getContext('2d');
+
+// What? Does that make sense? The method name is drawImage,
+// but your passing in a video element?
+// Yep. That's how you do it. Now the current video frame is drawn onto the
+// canvas.
+canvasContext.drawImage(video,
+    0, 0, video.videoWidth, video.videoHeight,
+    0, 0, canvas.width,  canvas.height
+);
+
+// This next part is where the ascii magic happens, but it can also fail if the
+// video source wasn't loaded from a data-url or from a file in your domain. 
+processImageData(canvasContext.getImageData(0, 0, canvas.width, canvas.height));
+{/literal}
+{/template}
+
+
+/**
+ * Code for demonstrating grabbing video frames via the Canvas part 2.
+ */
+{template .canvasCode2}
+{literal}
+// Suppose that our video that is playing is in a &lt;video&gt; tag with id
+// 'video-src'
+var video = document.getElementById('video-src');
+
+// Now lets create a canvas element.
+var canvas = document.createElement('canvas');
+canvas.width = 640;
+canvas.height = 480;
+var canvasContext = canvas.getContext('2d');
+
+var processCurrentFrame = function() {
+  // Now the current video frame is drawn onto the canvas.
+  canvasContext.drawImage(video,
+      0, 0, video.videoWidth, video.videoHeight,
+      0, 0, canvas.width,  canvas.height
+  );
+
+  processImageData(
+    canvasContext.getImageData(0, 0, canvas.width, canvas.height));
+  setTimeout(processCurrentFrame, 32);
+};
+processCurrentFrame();
+{/literal}
+{/template}
+
+
+/**
+ * Code for demonstrating converting image frame to ascii frame
+ */
+{template .pixelCode}
+{literal}
+// Remember that this is how we grabbed the image data from the canvas and that
+// it'll only work if we haven't drawn any cross domain images (or videos) onto
+// the canvas. We can assume that the image is already scaled down, since we
+// scaled the video when we drew it onto the canvas.
+var imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+
+// The pixel data is in the data field of imageData
+var data = imageData.data;
+
+// Iterate through our image
+for ( var y = 0; y < canvas.height; y++) {
+  for ( var x = 0; x < canvas.width; x++) {
+    // data is a 1d array. A pixel is comprised of four bytes,
+    // the red, green, blue, and alpha components respectively.
+    // Therefore, each pixel at {x, y} is stored beginning at
+    // (y * width + x) * 4
+    var ind = ((y * canvas.width) + x) * 4;
+    var r = data[ind];
+    var g = data[ind + 1];
+    var b = data[ind + 2];
+    var l = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+
+    // frame is a string
+    frame += getCharacterFromLuminance(l);
+  }
+  if (y < canvas.height - 1) {
+    frame += '\n';
+  }
+}
+{/literal}
+{/template}

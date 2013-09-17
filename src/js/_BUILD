@@ -1,0 +1,14 @@
+/**
+ * Builds js into closure
+ */
+
+Package closure = Package(
+    js.compile()
+        .from("lib", "compiled", "src")
+        .into(bin("bin/js/app.min.js"))
+        .withNamespace("asv.App")
+        .withExtern("externs/console.js")
+        .require("/src/soy:js")
+);
+
+defaultTo(closure);

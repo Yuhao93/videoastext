@@ -1,4 +1,3 @@
-closure-library/*
 WEB-INF/*
-js/out/app.min.js
-js/out/deps.js
+bin/js/*
+src/js/compiled/*
