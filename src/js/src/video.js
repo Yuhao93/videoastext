@@ -80,7 +80,7 @@ asv.Video.prototype.convertFrame_ = function(imageData) {
           asv.Video.PALETTE[Math.floor(l * asv.Video.PALETTE.length / 256)]);
     }
     if (y < this.height_ - 1) {
-      frame.push('<br>');
+      frame.push('\n');
     }
   }
   return frame.join('');

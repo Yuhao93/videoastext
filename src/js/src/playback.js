@@ -2,6 +2,7 @@ goog.provide('asv.Playback');
 
 goog.require('asv.Screen');
 goog.require('asv.Video');
+goog.require('goog.async.AnimationDelay');
 goog.require('goog.dom');
 goog.require('goog.style');
 goog.require('goog.events');
@@ -32,10 +33,10 @@ asv.Playback = function(video) {
       goog.bind(this.onFullscreen_, this));
   
   /**
-   * @type {?number}
+   * @type {goog.async.AnimationDelay}
    * @private
    */
-  this.timeout_ = null;
+  this.timeout_ = new goog.async.AnimationDelay(goog.bind(this.play, this));
 
   this.video_.setFrameMaxSize(asv.Measure.instance.calculateMaximum(
       this.screen_.getMaxSize()));
@@ -57,7 +58,7 @@ asv.Playback.prototype.play = function() {
     var progress = this.video_.getCurrentTime() / this.video_.getDuration();
     this.screen_.update(progress);
     this.screen_.drawFrame(frame);
-    this.timeout_ = setTimeout(goog.bind(this.play, this), 16);
+    this.timeout_.start();
   } else {
     this.screen_.hide();
   }
@@ -69,8 +70,7 @@ asv.Playback.prototype.play = function() {
  */
 asv.Playback.prototype.onHide_ = function() {
   this.video_.stop();
-  clearTimeout(this.timeout_);
-  this.timeout_ = null;
+  this.timeout_.stop();
 };
 
 
@@ -81,8 +81,7 @@ asv.Playback.prototype.onHide_ = function() {
 asv.Playback.prototype.togglePlayPause_ = function(playing) {
   if (!playing) {
     this.video_.pause();
-    clearTimeout(this.timeout_);
-    this.timeout_ = null;
+    this.timeout_.stop();
   } else {
     this.video_.play();
     this.play();
